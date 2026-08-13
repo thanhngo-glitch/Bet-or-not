@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BET OR NOT? - Game So Sánh Số Tiểu Học</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1E293B',
+                            900: '#0F172A',
+                            950: '#0B0F19',
+                        },
+                        academic: {
+                            blue: '#2563EB',
+                            lightBlue: '#60A5FA',
+                            yellow: '#F59E0B',
+                            yellowLight: '#FEF3C7',
+                            orange: '#EA580C',
+                            orangeLight: '#FFEDD5',
+                            cream: '#FFFBEB',
+                            green: '#10B981',
+                            red: '#EF4444'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Fredoka', 'sans-serif'],
+                        body: ['Nunito', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'game': '0 10px 0 0 rgba(0, 0, 0, 0.2)',
+                        'game-lg': '0 14px 0 0 rgba(0, 0, 0, 0.25)',
+                        'game-pressed': '0 2px 0 0 rgba(0, 0, 0, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #FFFBEB;
+            background-image: radial-gradient(#FDE68A 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+
+        .font-display {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* Custom Keyframe Animations */
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            80% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2s infinite ease-in-out;
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .animate-pop {
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .btn-3d {
+            transition: all 0.1s ease;
+        }
+
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .operator-btn.selected {
+            ring: 4px solid #2563EB;
+            transform: scale(1.08);
+            background-color: #DBEAFE !important;
+            border-color: #2563EB !important;
+        }
+
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between selection:bg-amber-300 selection:text-amber-900">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full bg-navy-900 text-white shadow-xl border-b-4 border-amber-400 py-3 px-4 md:px-8">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-3">
+            <!-- Game Title & Branding -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-400 text-navy-900 w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center font-display font-extrabold text-xl md:text-2xl shadow-md transform -rotate-3">
+                    ?
+                </div>
+                <div>
+                    <h1 class="font-display text-xl md:text-3xl font-extrabold tracking-wider text-amber-400 drop-shadow flex items-center gap-2">
+                        BET OR NOT?
+                        <span class="text-xs font-body font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full uppercase tracking-normal">Math Quiz</span>
+                    </h1>
+                    <p class="text-xs text-slate-300 font-semibold hidden sm:block">Luyện tập so sánh số - Thách thức tư duy!</p>
+                </div>
+            </div>
+
+            <!-- Header Controls & Utilities -->
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="bg-navy-800 hover:bg-slate-700 text-amber-300 p-2.5 rounded-xl border border-slate-600 transition flex items-center justify-center w-10 h-10 md:w-11 md:h-11 shadow" title="Bật/Tắt Âm thanh">
+                    <i id="soundIcon" class="fas fa-volume-up text-lg"></i>
+                </button>
+
+                <button onclick="toggleTeacherHint()" class="bg-navy-800 hover:bg-slate-700 text-cyan-300 px-3 py-2 rounded-xl border border-slate-600 text-xs md:text-sm font-bold transition flex items-center gap-1.5 shadow" title="Xem hướng dẫn giáo viên">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span class="hidden md:inline">Góc Giáo Viên</span>
+                </button>
+
+                <button onclick="restartGame()" class="bg-amber-500 hover:bg-amber-600 text-navy-900 font-display font-bold px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm transition shadow flex items-center gap-1.5">
+                    <i class="fas fa-redo-alt"></i>
+                    <span>Chơi Lại</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Container -->
+    <main class="max-w-4xl mx-auto w-full px-4 py-4 md:py-6 flex-grow flex flex-col justify-center">
+
+        <!-- Teacher / Educational Guide Modal Banner (Hidden by default) -->
+        <div id="teacherHintBox" class="hidden mb-6 bg-cyan-900/90 text-cyan-50 border-2 border-cyan-400 rounded-2xl p-4 shadow-xl animate-pop relative">
+            <button onclick="toggleTeacherHint()" class="absolute top-3 right-3 text-cyan-200 hover:text-white text-lg">
+                <i class="fas fa-times-circle"></i>
+            </button>
+            <h3 class="font-display text-lg font-bold text-amber-300 flex items-center gap-2 mb-2">
+                <i class="fas fa-lightbulb"></i> Mẹo Sư Phạm & Luật Chơi "Bet or Not?"
+            </h3>
+            <ul class="text-xs md:text-sm space-x-0 space-y-1 text-cyan-100 list-disc list-inside">
+                <li><b>Mục tiêu:</b> Giúp học sinh tự tin nhận diện giá trị các số và quản lý rủi ro toán học.</li>
+                <li><b>BET (Đặt cược 🎲):</b> Chọn khi học sinh <b>RẤT CHẮC CHẮN</b> về đáp án. Đúng: <span class="text-green-300 font-bold">+10 điểm</span> | Sai: <span class="text-red-300 font-bold">-5 điểm</span>.</li>
+                <li><b>NOT BET (An toàn 🛡️):</b> Chọn khi học sinh <b>CHƯA CHẮC CHẮN</b>. Đúng: <span class="text-green-300 font-bold">+5 điểm</span> | Sai: <span class="text-amber-300 font-bold">0 điểm (không bị trừ điểm)</span>.</li>
+            </ul>
+        </div>
+
+        <!-- Top Stats Dashboard Bar -->
+        <div id="statsBar" class="grid grid-cols-3 gap-2 md:gap-4 mb-6">
+            <!-- Score Card -->
+            <div class="bg-white border-2 border-amber-400 rounded-2xl p-3 md:p-4 text-center shadow-md flex flex-col justify-center relative overflow-hidden">
+                <div class="absolute -right-2 -bottom-2 text-amber-100 text-4xl font-black pointer-events-none">★</div>
+                <span class="text-xs font-extrabold uppercase text-amber-600 tracking-wider">Điểm Số</span>
+                <span id="scoreDisplay" class="font-display text-2xl md:text-4xl font-extrabold text-navy-900">0</span>
+            </div>
+
+            <!-- Question Progress Card -->
+            <div class="bg-white border-2 border-blue-400 rounded-2xl p-3 md:p-4 text-center shadow-md flex flex-col justify-center">
+                <span class="text-xs font-extrabold uppercase text-blue-600 tracking-wider">Câu Hỏi</span>
+                <div class="font-display text-xl md:text-3xl font-extrabold text-navy-900">
+                    <span id="currentQuestionNum">1</span><span class="text-slate-400 text-base md:text-xl">/<span id="totalQuestionsNum">15</span></span>
+                </div>
+            </div>
+
+            <!-- Streak Counter Card -->
+            <div class="bg-white border-2 border-orange-400 rounded-2xl p-3 md:p-4 text-center shadow-md flex flex-col justify-center relative overflow-hidden">
+                <div class="absolute -right-2 -bottom-2 text-orange-100 text-4xl font-black pointer-events-none">🔥</div>
+                <span class="text-xs font-extrabold uppercase text-orange-600 tracking-wider">Chuỗi Đúng</span>
+                <span id="streakDisplay" class="font-display text-2xl md:text-4xl font-extrabold text-orange-600">0 🔥</span>
+            </div>
+        </div>
+
+        <!-- MAIN GAME SHOW ARENA -->
+        <div id="gameArena" class="glass-panel border-4 border-navy-900 rounded-3xl p-4 md:p-8 shadow-game-lg relative overflow-hidden transition-all">
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 h-2.5 rounded-full mb-6 overflow-hidden border border-slate-300">
+                <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-amber-500 h-full w-0 transition-all duration-500 rounded-full"></div>
+            </div>
+
+            <!-- Stage 1: Question Display Card -->
+            <div id="questionStage" class="text-center">
+                <!-- Question Badge -->
+                <div class="inline-block bg-navy-900 text-amber-300 font-display font-bold px-4 py-1.5 rounded-full text-xs md:text-sm uppercase tracking-wider mb-4 border border-amber-400/50 shadow">
+                    <i class="fas fa-balance-scale"></i> So Sánh Hai Số Sau
+                </div>
+
+                <!-- Number Comparison Presentation Area -->
+                <div class="flex items-center justify-center gap-2 sm:gap-4 md:gap-8 my-4 md:my-8">
+                    <!-- Left Number Box -->
+                    <div class="flex-1 bg-white border-3 md:border-4 border-blue-500 rounded-2xl md:rounded-3xl p-3 sm:p-6 md:p-8 shadow-md text-center transform transition duration-300 hover:scale-105">
+                        <span id="numLeft" class="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold text-navy-900 tracking-tight">255</span>
+                    </div>
+
+                    <!-- Comparison Slot -->
+                    <div id="symbolSlot" class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-amber-100 border-4 border-dashed border-amber-500 rounded-2xl md:rounded-3xl flex items-center justify-center font-display text-3xl sm:text-5xl md:text-6xl font-black text-amber-600 shadow-inner animate-pulse-subtle">
+                        ?
+                    </div>
+
+                    <!-- Right Number Box -->
+                    <div class="flex-1 bg-white border-3 md:border-4 border-blue-500 rounded-2xl md:rounded-3xl p-3 sm:p-6 md:p-8 shadow-md text-center transform transition duration-300 hover:scale-105">
+                        <span id="numRight" class="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold text-navy-900 tracking-tight">244</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Symbol Selection Controls -->
+                <div class="mt-6 md:mt-8">
+                    <p class="text-xs md:text-sm font-extrabold text-slate-600 uppercase tracking-wider mb-3">
+                        Bước 1: Chọn Dấu So Sánh Đúng
+                    </p>
+                    <div class="flex justify-center gap-3 sm:gap-6">
+                        <button onclick="selectOperator('>')" id="btn-gt" class="operator-btn btn-3d bg-white hover:bg-slate-50 text-navy-900 border-3 border-slate-300 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl font-display text-3xl md:text-5xl font-black shadow-game flex items-center justify-center transition">
+                            &gt;
+                        </button>
+                        <button onclick="selectOperator('<')" id="btn-lt" class="operator-btn btn-3d bg-white hover:bg-slate-50 text-navy-900 border-3 border-slate-300 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl font-display text-3xl md:text-5xl font-black shadow-game flex items-center justify-center transition">
+                            &lt;
+                        </button>
+                        <button onclick="selectOperator('=')" id="btn-eq" class="operator-btn btn-3d bg-white hover:bg-slate-50 text-navy-900 border-3 border-slate-300 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl font-display text-3xl md:text-5xl font-black shadow-game flex items-center justify-center transition">
+                            =
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Bet Decision Controls -->
+                <div class="mt-8 pt-6 border-t-2 border-slate-200">
+                    <p class="text-xs md:text-sm font-extrabold text-slate-600 uppercase tracking-wider mb-3">
+                        Bước 2: Bạn Có Muốn Đặt Cược Không?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+                        <!-- BET BUTTON -->
+                        <button onclick="makeDecision(true)" id="betBtn" disabled class="btn-3d bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-amber-500 disabled:cursor-not-allowed text-navy-900 border-3 border-amber-600 rounded-2xl p-3 md:p-4 shadow-game flex items-center justify-center gap-3 transition group">
+                            <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xl font-black group-hover:scale-110 transition">
+                                🎲
+                            </div>
+                            <div class="text-left">
+                                <div class="font-display font-extrabold text-base md:text-lg leading-none">CƯỢC! (BET)</div>
+                                <div class="text-[11px] font-bold text-amber-950 mt-1">Đúng: <span class="text-emerald-900 font-extrabold">+10đ</span> | Sai: <span class="text-rose-900 font-extrabold">-5đ</span></div>
+                            </div>
+                        </button>
+
+                        <!-- NOT BET BUTTON -->
+                        <button onclick="makeDecision(false)" id="notBetBtn" disabled class="btn-3d bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:hover:bg-slate-200 disabled:cursor-not-allowed text-slate-800 border-3 border-slate-400 rounded-2xl p-3 md:p-4 shadow-game flex items-center justify-center gap-3 transition group">
+                            <div class="w-10 h-10 rounded-xl bg-slate-400 text-white flex items-center justify-center text-xl font-black group-hover:scale-110 transition">
+                                🛡️
+                            </div>
+                            <div class="text-left">
+                                <div class="font-display font-extrabold text-base md:text-lg leading-none">AN TOÀN (NOT BET)</div>
+                                <div class="text-[11px] font-bold text-slate-700 mt-1">Đúng: <span class="text-emerald-700 font-extrabold">+5đ</span> | Sai: <span class="text-slate-800 font-extrabold">0đ</span></div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Overlay / Result Modal -->
+            <div id="feedbackModal" class="hidden absolute inset-0 bg-navy-900/95 rounded-2xl md:rounded-3xl p-6 flex flex-col items-center justify-center text-center z-20 animate-pop backdrop-blur-md">
+                
+                <div id="feedbackBadge" class="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg border-4">
+                    <i id="feedbackIcon" class="fas"></i>
+                </div>
+
+                <h2 id="feedbackTitle" class="font-display text-3xl md:text-5xl font-extrabold mb-2 text-white">
+                    CORRECT!
+                </h2>
+
+                <div id="pointsTag" class="inline-block bg-amber-400 text-navy-900 font-display font-black px-6 py-2 rounded-full text-lg md:text-2xl shadow-md mb-4 animate-bounce">
+                    +10 POINTS
+                </div>
+
+                <div class="bg-navy-800 border-2 border-slate-700 rounded-2xl p-4 max-w-md w-full mb-6">
+                    <p class="text-xs uppercase tracking-wider text-amber-400 font-bold mb-1">Giải Thích Đáp Án:</p>
+                    <p id="feedbackExplanation" class="text-sm md:text-base font-semibold text-slate-200">
+                        255 lớn hơn 244 vì hàng trăm bằng nhau nhưng hàng chục 5 > 4.
+                    </p>
+                </div>
+
+                <button onclick="nextQuestion()" class="btn-3d bg-amber-400 hover:bg-amber-300 text-navy-900 font-display font-black text-lg md:text-xl px-8 py-3.5 rounded-2xl border-3 border-amber-600 shadow-game flex items-center gap-2">
+                    <span>CÂU HỎI TIẾP THEO</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- FINAL GAME OVER SCREEN (Hidden initially) -->
+        <div id="gameOverScreen" class="hidden glass-panel border-4 border-navy-900 rounded-3xl p-6 md:p-10 shadow-game-lg text-center animate-pop">
+            
+            <div class="inline-block bg-amber-400 text-navy-900 font-display font-black text-sm md:text-base px-4 py-1.5 rounded-full uppercase tracking-widest mb-3 shadow">
+                🎉 Hoàn Thành Xuất Sắc!
+            </div>
+
+            <h2 class="font-display text-4xl md:text-6xl font-black text-navy-900 mb-2">
+                GAME OVER!
+            </h2>
+            <p class="text-slate-600 font-bold text-sm md:text-base mb-6">Bạn đã hoàn thành bài luyện tập So Sánh Số!</p>
+
+            <!-- Final Score Showcase Box -->
+            <div class="bg-gradient-to-br from-navy-900 to-slate-800 text-white rounded-3xl p-6 md:p-8 max-w-md mx-auto mb-8 shadow-xl border-4 border-amber-400 relative overflow-hidden">
+                <div class="text-amber-400 text-xs font-black uppercase tracking-wider mb-1">Tổng Điểm Cuối Cùng</div>
+                <div id="finalScore" class="font-display text-5xl md:text-7xl font-black text-amber-300 drop-shadow">
+                    125
+                </div>
+                <div id="finalRankBadge" class="mt-2 inline-block bg-amber-500/30 border border-amber-400/50 text-amber-200 font-bold text-xs md:text-sm px-3 py-1 rounded-full">
+                    🏆 Thần Đồng So Sánh
+                </div>
+            </div>
+
+            <!-- Detailed Stats Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 max-w-2xl mx-auto mb-8 text-left">
+                <!-- Stat 1: Correct Answers -->
+                <div class="bg-white border-2 border-emerald-400 rounded-2xl p-3 shadow-sm">
+                    <div class="text-[11px] font-extrabold uppercase text-emerald-600">Câu Trả Lời Đúng</div>
+                    <div id="statCorrect" class="font-display text-xl md:text-2xl font-black text-navy-900">14/15</div>
+                </div>
+
+                <!-- Stat 2: Total Bets -->
+                <div class="bg-white border-2 border-amber-400 rounded-2xl p-3 shadow-sm">
+                    <div class="text-[11px] font-extrabold uppercase text-amber-600">Lượt Đặt Cược</div>
+                    <div id="statTotalBets" class="font-display text-xl md:text-2xl font-black text-navy-900">8 Lần</div>
+                </div>
+
+                <!-- Stat 3: Successful Bets -->
+                <div class="bg-white border-2 border-blue-400 rounded-2xl p-3 shadow-sm">
+                    <div class="text-[11px] font-extrabold uppercase text-blue-600">Cược Thành Công</div>
+                    <div id="statSuccessfulBets" class="font-display text-xl md:text-2xl font-black text-navy-900">7 Lần</div>
+                </div>
+
+                <!-- Stat 4: Max Streak -->
+                <div class="bg-white border-2 border-orange-400 rounded-2xl p-3 shadow-sm">
+                    <div class="text-[11px] font-extrabold uppercase text-orange-600">Chuỗi Đúng Cao Nhất</div>
+                    <div id="statMaxStreak" class="font-display text-xl md:text-2xl font-black text-navy-900">9 Câu</div>
+                </div>
+            </div>
+
+            <!-- Restart / Replay Button -->
+            <button onclick="restartGame()" class="btn-3d bg-amber-400 hover:bg-amber-300 text-navy-900 font-display font-black text-xl md:text-2xl px-10 py-4 rounded-2xl border-4 border-amber-600 shadow-game inline-flex items-center gap-3">
+                <i class="fas fa-play"></i>
+                <span>CHƠI LẠI TRÒ CHƠI</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-navy-950 text-slate-400 text-center text-xs py-3 border-t border-slate-800">
+        <p class="font-semibold">Game EdTech So Sánh Số "BET OR NOT?" &copy; Thiết kế dành cho Học sinh Tiểu học.</p>
+    </footer>
+
+    <script>
+        // Array of 15 Question Objects with increasing difficulty & clear pedagogical explanations
+        const questionBank = [
+            { id: 1, num1: 255, num2: 244, answer: '>', explanation: '255 > 244 vì chữ số hàng trăm bằng nhau (2=2), nhưng chữ số hàng chục 5 > 4.' },
+            { id: 2, num1: 132, num2: 189, answer: '<', explanation: '132 < 189 vì chữ số hàng trăm bằng nhau (1=1), nhưng chữ số hàng chục 3 < 8.' },
+            { id: 3, num1: 450, num2: 450, answer: '=', explanation: '450 = 450 vì tất cả các chữ số hàng trăm, hàng chục, hàng đơn vị đều giống nhau.' },
+            { id: 4, num1: 706, num2: 670, answer: '>', explanation: '706 > 670 vì chữ số hàng trăm 7 > 6.' },
+            { id: 5, num1: 315, num2: 351, answer: '<', explanation: '315 < 351 vì chữ số hàng trăm bằng nhau (3=3), nhưng chữ số hàng chục 1 < 5.' },
+            { id: 6, num1: 899, num2: 901, answer: '<', explanation: '899 < 901 vì chữ số hàng trăm 8 < 9.' },
+            { id: 7, num1: 1000, num2: 999, answer: '>', explanation: '1000 > 999 vì 1000 có 4 chữ số, còn 999 chỉ có 3 chữ số.' },
+            { id: 8, num1: 520, num2: 500 + 20, answer: '=', explanation: '520 = 500 + 20 vì 500 + 20 có kết quả đúng bằng 520.' },
+            { id: 9, num1: 648, num2: 684, answer: '<', explanation: '648 < 684 vì ở hàng chục 4 < 8.' },
+            { id: 10, num1: -5, num2: 2, answer: '<', explanation: '-5 < 2 vì bất kỳ số âm nào cũng nhỏ hơn một số dương.' },
+            { id: 11, num1: 1250, num2: 1205, answer: '>', explanation: '1250 > 1205 vì ở hàng chục 5 > 0.' },
+            { id: 12, num1: 3500, num2: 3500, answer: '=', explanation: '3500 = 3500 vì cả hai số có giá trị hoàn toàn như nhau.' },
+            { id: 13, num1: -10, num2: -3, answer: '<', explanation: '-10 < -3 vì trên trục số, số -10 nằm xa về bên trái hơn số -3.' },
+            { id: 14, num1: 4050, num2: 4500, answer: '<', explanation: '4050 < 4500 vì chữ số hàng trăm 0 < 5.' },
+            { id: 15, num1: 9999, num2: 10000, answer: '<', explanation: '9999 < 10000 vì 9999 có 4 chữ số, nhỏ hơn 10000 có 5 chữ số.' }
+        ];
+
+        // Web Audio API Synthesizer (No external MP3 files needed)
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundIcon = document.getElementById('soundIcon');
+            const soundBtn = document.getElementById('soundToggleBtn');
+            if (soundEnabled) {
+                soundIcon.className = 'fas fa-volume-up text-lg';
+                soundBtn.classList.remove('opacity-50');
+                playSynthesizedSound('click');
+            } else {
+                soundIcon.className = 'fas fa-volume-mute text-lg';
+                soundBtn.classList.add('opacity-50');
+            }
+        }
+
+        function playSynthesizedSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+
+                if (type === 'select') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, now); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.1); // A5
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'correct') {
+                    // Happy Major Arpeggio
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.25);
+                    });
+                } else if (type === 'wrong') {
+                    // Low Buzzer
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'click') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'win') {
+                    // Fanfare
+                    [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'square';
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.1);
+                        osc.stop(now + idx * 0.1 + 0.4);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        // Game State Variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let selectedOperator = null;
+        let totalBets = 0;
+        let successfulBets = 0;
+        let correctAnswersCount = 0;
+
+        function initGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            totalBets = 0;
+            successfulBets = 0;
+            correctAnswersCount = 0;
+            selectedOperator = null;
+
+            document.getElementById('totalQuestionsNum').textContent = questionBank.length;
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('gameArena').classList.remove('hidden');
+            document.getElementById('statsBar').classList.remove('hidden');
+
+            updateStatsDisplay();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            selectedOperator = null;
+            resetOperatorButtons();
+
+            const currentQ = questionBank[currentQuestionIndex];
+            document.getElementById('currentQuestionNum').textContent = currentQuestionIndex + 1;
+            document.getElementById('numLeft').textContent = currentQ.num1;
+            document.getElementById('numRight').textContent = currentQ.num2;
+            document.getElementById('symbolSlot').textContent = '?';
+            document.getElementById('symbolSlot').className = 'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-amber-100 border-4 border-dashed border-amber-500 rounded-2xl md:rounded-3xl flex items-center justify-center font-display text-3xl sm:text-5xl md:text-6xl font-black text-amber-600 shadow-inner animate-pulse-subtle';
+
+            // Disable Bet buttons until an operator is chosen
+            document.getElementById('betBtn').disabled = true;
+            document.getElementById('notBetBtn').disabled = true;
+
+            // Hide Feedback modal
+            document.getElementById('feedbackModal').classList.add('hidden');
+
+            // Update Progress Bar
+            const progressPercent = ((currentQuestionIndex) / questionBank.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+        }
+
+        function selectOperator(op) {
+            selectedOperator = op;
+            playSynthesizedSound('select');
+
+            // UI feedback on slot & buttons
+            document.getElementById('symbolSlot').textContent = op;
+            document.getElementById('symbolSlot').className = 'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-blue-100 border-4 border-solid border-blue-600 rounded-2xl md:rounded-3xl flex items-center justify-center font-display text-3xl sm:text-5xl md:text-6xl font-black text-blue-700 shadow-md animate-pop';
+
+            resetOperatorButtons();
+
+            if (op === '>') {
+                document.getElementById('btn-gt').classList.add('selected');
+            } else if (op === '<') {
+                document.getElementById('btn-lt').classList.add('selected');
+            } else if (op === '=') {
+                document.getElementById('btn-eq').classList.add('selected');
+            }
+
+            // Enable BET and NOT BET action buttons
+            document.getElementById('betBtn').disabled = false;
+            document.getElementById('notBetBtn').disabled = false;
+        }
+
+        function resetOperatorButtons() {
+            const btns = document.querySelectorAll('.operator-btn');
+            btns.forEach(btn => btn.classList.remove('selected'));
+        }
+
+        function makeDecision(isBet) {
+            if (!selectedOperator) return;
+
+            const currentQ = questionBank[currentQuestionIndex];
+            const isCorrect = (selectedOperator === currentQ.answer);
+            
+            let pointsEarned = 0;
+
+            if (isBet) {
+                totalBets++;
+                if (isCorrect) {
+                    successfulBets++;
+                    pointsEarned = 10;
+                } else {
+                    pointsEarned = -5;
+                }
+            } else {
+                if (isCorrect) {
+                    pointsEarned = 5;
+                } else {
+                    pointsEarned = 0;
+                }
+            }
+
+            if (isCorrect) {
+                correctAnswersCount++;
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                playSynthesizedSound('correct');
+            } else {
+                streak = 0;
+                playSynthesizedSound('wrong');
+            }
+
+            score += pointsEarned;
+            if (score < 0) score = 0; // Don't let score drop below zero for elementary confidence
+
+            updateStatsDisplay();
+            showFeedback(isCorrect, isBet, pointsEarned, currentQ);
+        }
+
+        function showFeedback(isCorrect, isBet, pointsEarned, currentQ) {
+            const modal = document.getElementById('feedbackModal');
+            const badge = document.getElementById('feedbackBadge');
+            const icon = document.getElementById('feedbackIcon');
+            const title = document.getElementById('feedbackTitle');
+            const pointsTag = document.getElementById('pointsTag');
+            const explanation = document.getElementById('feedbackExplanation');
+
+            if (isCorrect) {
+                badge.className = 'w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg border-4 bg-emerald-500 border-emerald-300 text-white';
+                icon.className = 'fas fa-check';
+                title.textContent = isBet ? 'XUẤT SẮC! CƯỢC THẮNG!' : 'CHÍNH XÁC!';
+                title.className = 'font-display text-3xl md:text-5xl font-extrabold mb-2 text-emerald-400';
+                
+                pointsTag.textContent = `+${pointsEarned} ĐIỂM`;
+                pointsTag.className = 'inline-block bg-emerald-400 text-navy-950 font-display font-black px-6 py-2 rounded-full text-lg md:text-2xl shadow-md mb-4 animate-bounce';
+            } else {
+                badge.className = 'w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg border-4 bg-rose-500 border-rose-300 text-white animate-shake';
+                icon.className = 'fas fa-times';
+                title.textContent = isBet ? 'TIẾC QUÁ! CƯỢC THUA!' : 'RẤT TIẾC! CHƯA ĐÚNG!';
+                title.className = 'font-display text-3xl md:text-5xl font-extrabold mb-2 text-rose-400';
+
+                pointsTag.textContent = pointsEarned < 0 ? `${pointsEarned} ĐIỂM` : '0 ĐIỂM';
+                pointsTag.className = 'inline-block bg-rose-500 text-white font-display font-black px-6 py-2 rounded-full text-lg md:text-2xl shadow-md mb-4';
+            }
+
+            explanation.innerHTML = `
+                <div class="mb-2 font-black text-amber-300 text-lg">Đáp án đúng: ${currentQ.num1} ${currentQ.answer} ${currentQ.num2}</div>
+                <div>${currentQ.explanation}</div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questionBank.length) {
+                loadQuestion();
+            } else {
+                showGameOver();
+            }
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('streakDisplay').textContent = `${streak} 🔥`;
+        }
+
+        function toggleTeacherHint() {
+            const hintBox = document.getElementById('teacherHintBox');
+            hintBox.classList.toggle('hidden');
+            playSynthesizedSound('click');
+        }
+
+        function showGameOver() {
+            playSynthesizedSound('win');
+            
+            document.getElementById('gameArena').classList.add('hidden');
+            document.getElementById('statsBar').classList.add('hidden');
+
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            gameOverScreen.classList.remove('hidden');
+
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('statCorrect').textContent = `${correctAnswersCount}/${questionBank.length}`;
+            document.getElementById('statTotalBets').textContent = `${totalBets} Lần`;
+            document.getElementById('statSuccessfulBets').textContent = `${successfulBets} Lần`;
+            document.getElementById('statMaxStreak').textContent = `${maxStreak} Câu`;
+
+            // Assign Title Rank based on performance
+            const rankBadge = document.getElementById('finalRankBadge');
+            if (score >= 120) {
+                rankBadge.textContent = '🏆 Vua Đặt Cược Toán Học (Master Gamer)';
+            } else if (score >= 80) {
+                rankBadge.textContent = '🌟 Thần Đồng So Sánh (Math Expert)';
+            } else if (score >= 50) {
+                rankBadge.textContent = '👍 Luyện Tập Tích Cực (Good Job)';
+            } else {
+                rankBadge.textContent = '🌱 Cố Gắng Lần Sau (Keep Practicing)';
+            }
+
+            // Trigger Confetti Celebration
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function restartGame() {
+            playSynthesizedSound('click');
+            initGame();
+        }
+
+        // Start game on window load
+        window.onload = function() {
+            initGame();
+        };
+    </script>
+</body>
+</html>
